@@ -499,6 +499,7 @@ def get_model_in_table(table_num, setting_num, device) :
     transformer_num_layers = {"temporal_num_layers" : 4, "global_num_layers" : 4}
     prefix_size_dict = {"temporal_prefix_size" : 15, "global_prefix_size" : 11}
     
+    Dataset = ''
     if (table_num == 1 and setting_num == 1) or (table_num == 2 and setting_num == 2) :
         Dataset = 'Clotho' 
     elif (table_num == 1 and setting_num == 2) or (table_num == 1 and setting_num == 3) or (table_num == 2 and setting_num == 1) or (table_num == 2 and setting_num == 3) :
@@ -508,7 +509,7 @@ def get_model_in_table(table_num, setting_num, device) :
         tokenizer_type = 'Custom'
         tokenizer = tokenizer_forCustomVocab(Dataset = Dataset)
         vocab_size = len(tokenizer.vocab)
-    else :
+    else : # setting_num != 1
         tokenizer_type = 'GPT2'
         tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
         vocab_size = None
@@ -526,6 +527,6 @@ def get_model_in_table(table_num, setting_num, device) :
     
     params = torch.load(model_path, map_location = device)
     
-    model.load_state_dict(params) 
+    model.load_state_dict(params, strict = False) 
     
     return model

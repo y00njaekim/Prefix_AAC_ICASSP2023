@@ -34,6 +34,7 @@ else :
     is_settingnum_3 = False
 
 model = get_model_in_table(table_num, setting_num, device)
+model.eval()
 
 
 # prepare audio input=========
@@ -43,18 +44,18 @@ set_length = 30
 audio_file, _ = torchaudio.load(audio_file_path)
 
 # slicing
-if audio_file.shape[0] > (SAMPLE_RATE * set_length) :
+if audio_file.shape[1] > (SAMPLE_RATE * set_length) :
     audio_file = audio_file[:SAMPLE_RATE * set_length]
 # zero padding
-if audio_file.shape[0] < (SAMPLE_RATE * set_length) :
-    pad_len = (SAMPLE_RATE * set_length) - audio_file.shape[0]
-    pad_val = torch.zeros(pad_len)
-    audio_file = torch.cat((audio_file, pad_val), dim=0)
+if audio_file.shape[1] < (SAMPLE_RATE * set_length) :
+    pad_len = (SAMPLE_RATE * set_length) - audio_file.shape[1]
+    pad_val = torch.zeros((1, pad_len))
+    audio_file = torch.cat((audio_file, pad_val), dim=1)
 # prepare audio input=========
 
 if len(audio_file.size()) == 3 :
     audio_file = audio_file.unsqueeze(0)
 
-pred_caption = model(audio_file, None, beam_search = True)[0][0]
+pred_caption = model(audio_file.to(device), None, beam_search = True)[0][0]
 
 print("Caption :", pred_caption)
