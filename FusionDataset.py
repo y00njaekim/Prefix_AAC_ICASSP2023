@@ -1,3 +1,4 @@
+import random
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
@@ -8,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 import pickle
 import re
+from torch.utils.data import SubsetRandomSampler
 import string
 
 
@@ -167,25 +169,34 @@ class FusionDataset(Dataset):
         else :
             return audio_file, self.caption_list_for_test[item], self.file_name_list[item]
             
-            
-    
 
-def dataloader_FusionDataset(tokenizer, batch_size, split, prefix_size, is_TrainDataset = False) :
-    
+
+
+def dataloader_FusionDataset(tokenizer, batch_size, split, prefix_size, is_TrainDataset=False, subset_ratio=1.0):
     dataset = FusionDataset(tokenizer, split, prefix_size)
+
+    cpu_core_num = 8
     
-    if is_TrainDataset == True :
+    # 데이터셋의 일부만 선택하기 위한 인덱스 생성
+    dataset_size = len(dataset)
+    subset_size = int(dataset_size * subset_ratio)
+    subset_indices = random.sample(range(dataset_size), subset_size)
+    
+    if is_TrainDataset:
+        sampler = SubsetRandomSampler(subset_indices)
         is_shuffle = True
         is_drop_last = True
-    else :
+    else:
+        sampler = None
         is_shuffle = False
         is_drop_last = False
     
-    cpu_core_num = 8
+    
     dataloader = DataLoader(dataset=dataset,
-                      batch_size=batch_size,
-                      shuffle=is_shuffle,
-                      num_workers=cpu_core_num,
-                      drop_last=is_drop_last)
+                            batch_size=batch_size,
+                            shuffle=is_shuffle,
+                            num_workers=cpu_core_num,
+                            drop_last=is_drop_last,
+                            sampler=sampler)
     
     return dataloader

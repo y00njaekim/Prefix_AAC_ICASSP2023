@@ -14,7 +14,7 @@ from eval_metrics import evaluate_metrics
 from terminaltables import AsciiTable
 import pickle
 
-def Train(model, LR, train_dataloader, test_dataloader, epochs, model_name, beam_search, device, Dataset = 'AudioCaps', test_dataloader_other_dataset = None) :
+def Train(model, LR, train_dataloader, test_dataloader, epochs, model_name, beam_search, device, Dataset='AudioCaps', test_dataloader_other_dataset=None, resume_epoch=0):
     
     model.train()
     model.to(device)
@@ -52,7 +52,17 @@ def Train(model, LR, train_dataloader, test_dataloader, epochs, model_name, beam
     
     training_consumed_sec = 0
     
-    for epoch in range(epochs) :
+    if resume_epoch > 0:
+        param_file_path = f"./Train_record/params_{model_name}/Param_epoch_{resume_epoch-1}.pt"
+        model.load_state_dict(torch.load(param_file_path))
+        
+        # 이전 optimizer와 scheduler 상태 로드
+        optimizer_state_dict = torch.load(f"./Train_record/optimizer_{model_name}/optimizer_epoch_{resume_epoch-1}.pt")
+        scheduler_state_dict = torch.load(f"./Train_record/scheduler_{model_name}/scheduler_epoch_{resume_epoch-1}.pt")
+        optimizer.load_state_dict(optimizer_state_dict)
+        scheduler.load_state_dict(scheduler_state_dict)
+    
+    for epoch in range(resume_epoch, epochs):
         pbar = tqdm(train_dataloader, desc=f"Training Epoch {epoch}")
         total_loss_per_epopch = 0.0
         loss_add_count = 0.0
@@ -106,6 +116,11 @@ def Train(model, LR, train_dataloader, test_dataloader, epochs, model_name, beam
         param_file_path = "./Train_record/params_" + model_name + "/Param_epoch_" + str(epoch) + ".pt"
             
         torch.save(model.state_dict(), param_file_path)
+        
+        optimizer_state_dict = optimizer.state_dict()
+        scheduler_state_dict = scheduler.state_dict()
+        torch.save(optimizer_state_dict, f"./Train_record/optimizer_{model_name}/optimizer_epoch_{epoch}.pt")
+        torch.save(scheduler_state_dict, f"./Train_record/scheduler_{model_name}/scheduler_epoch_{epoch}.pt")
 
     result_list = str(datetime.timedelta(seconds=training_consumed_sec)).split(".")
     print()

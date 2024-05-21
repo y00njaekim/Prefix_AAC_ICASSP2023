@@ -62,7 +62,7 @@ tokenizer_type = 'GPT2'
 TEST_BATCH_SIZE = 5
 TRAIN_BATCH_SIZE = 62
 test_dataloader  = dataloader_FusionDataset(tokenizer, TEST_BATCH_SIZE, 'test', prefix_size, is_TrainDataset = False)
-train_dataloader = dataloader_FusionDataset(tokenizer, TRAIN_BATCH_SIZE, 'train', prefix_size, is_TrainDataset = True)
+train_dataloader = dataloader_FusionDataset(tokenizer, TRAIN_BATCH_SIZE, 'train', prefix_size, is_TrainDataset=True, subset_ratio=0.1)
 
 # control randomness
 number = 2766
