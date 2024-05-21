@@ -184,7 +184,7 @@ def dataloader_FusionDataset(tokenizer, batch_size, split, prefix_size, is_Train
     
     if is_TrainDataset:
         sampler = SubsetRandomSampler(subset_indices)
-        is_shuffle = True
+        is_shuffle = False
         is_drop_last = True
     else:
         sampler = None

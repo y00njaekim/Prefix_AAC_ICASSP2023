@@ -22,10 +22,24 @@ def initialization(seed = 0):
 
 # Folder creation
 def createDirectory(MODEL_NAME):
-    directory = "./Train_record/params_" + MODEL_NAME
+    directory1 = "./Train_record/params_" + MODEL_NAME
     try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        if not os.path.exists(directory1):
+            os.makedirs(directory1)
+    except OSError:
+        print("Error: Failed to create the directory.")
+        
+    directory2 = "./Train_record/optimizer_" + MODEL_NAME
+    try:
+        if not os.path.exists(directory2):
+            os.makedirs(directory2)
+    except OSError:
+        print("Error: Failed to create the directory.")
+        
+    directory3 = "./Train_record/scheduler_" + MODEL_NAME
+    try:
+        if not os.path.exists(directory3):
+            os.makedirs(directory3)
     except OSError:
         print("Error: Failed to create the directory.")
 
@@ -88,7 +102,7 @@ model = get_AAC_Prefix(tokenizer,
 
 Train(model, LR, train_dataloader, test_dataloader,
     epochs, model_name = MODEL_NAME, beam_search = True, device = device,
-    Dataset = 'Fusion')
+    Dataset = 'Fusion', resume_epoch=14)
 
 torch.cuda.empty_cache()
 #============Experiment================
